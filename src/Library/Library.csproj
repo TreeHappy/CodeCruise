@@ -7,7 +7,6 @@
 	<ItemGroup>
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Broslyn" Version="1.1.0" />
 	  <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2.0-2.final" />
 	</ItemGroup>
 </Project>
