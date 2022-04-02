@@ -7,7 +7,10 @@ namespace Library
 
     public static class Roslyn
     {
-        public static Project MkProject(AdhocWorkspace workspace, FileInfo project)
+        public static Func<AdhocWorkspace, FileInfo, Project> MkProjectLoader(Func<FileInfo, IEnumerable<FileInfo>> getFilesFromProject) =>
+            (aw, pi) => MkProject(getFilesFromProject, aw, pi);
+
+        public static Project MkProject(Func<FileInfo, IEnumerable<FileInfo>> getFilesFromProject, AdhocWorkspace workspace, FileInfo project)
         {
             var projectName = Path.GetFileNameWithoutExtension(project.Name);
             var projectId = ProjectId.CreateNewId();
@@ -27,30 +30,33 @@ namespace Library
                             }
                     );
             var roslynProject = workspace.AddProject(projectInfo);
+            var files = getFilesFromProject(project);
 
-            foreach (var projectFile in Build.GetFilesFromProject(project))
+            foreach (var file in files)
                 workspace.AddDocument
                     ( projectId
-                    , projectFile.Name
-                    , SourceText.From(File.ReadAllText(projectFile.FullName))
+                    , file.Name
+                    , SourceText.From(File.ReadAllText(file.FullName))
                     );
 
             return roslynProject;
         }
 
-        public static Solution MkSolution(FileInfo solutionFile)
+        public static Solution MkSolution(FileInfo solutionFile, Func<AdhocWorkspace, FileInfo, Project> mkProject)
         {
-            bool IsCSProject(FileInfo project) =>
-                project.FullName.EndsWith("csproj");
-
             if (solutionFile.Exists == false)
                 throw new FileNotFoundException($"{solutionFile.FullName} not found.");
+
+            if (solutionFile.Extension != ".sln")
+                throw new FileLoadException($"{solutionFile.FullName} is not a solution file.");
 
             var workspace = new AdhocWorkspace();
             var solution =
                 workspace.AddSolution
-                    ( SolutionInfo.Create(SolutionId.CreateNewId()
-                    , VersionStamp.Default)
+                    ( SolutionInfo.Create
+                        ( SolutionId.CreateNewId()
+                        , VersionStamp.Default
+                        )
                     );
             var projects =
                 Build
@@ -58,15 +64,19 @@ namespace Library
                     .Where(IsCSProject);
 
             foreach (var project in projects)
-                MkProject(workspace, project);
+                mkProject(workspace, project);
 
             ResolveProjectReferences(workspace);
 
             return workspace.CurrentSolution;
+
+            bool IsCSProject(FileInfo project) =>
+                project.FullName.EndsWith("csproj");
         }
 
         public static Document GetDocument(Solution solution, string projectName, string fileName) =>
-            solution.Projects.First(p => p.Name == projectName)
+            solution
+            .Projects.First(p => p.Name == projectName)
             .Documents.First(d => d.Name == fileName);
 
         public static void ResolveProjectReferences(Workspace workspace)
@@ -90,14 +100,16 @@ namespace Library
                                 ( GetProjectId
                                     ( workspace.CurrentSolution
                                     , projectReference
-                                    )));
+                                    )
+                                )
+                            );
                 }
 
                 solution = project.Solution;
             }
 
-            if (!workspace.TryApplyChanges(solution))
-                System.Console.WriteLine("hae?");
+            if (workspace.TryApplyChanges(solution) is false)
+                System.Console.WriteLine("Changes could not be applied.");
         }
     }
 }
