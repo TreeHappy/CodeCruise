@@ -7,10 +7,10 @@ namespace Library
 
     public static class Roslyn
     {
-        public static Func<AdhocWorkspace, FileInfo, Project> MkProjectLoader(Func<FileInfo, IEnumerable<FileInfo>> getFilesFromProject) =>
+        public static Func<AdhocWorkspace, FileInfo, Project> MkProjectLoader(GetFilesFromProjectType getFilesFromProject) =>
             (aw, pi) => MkProject(getFilesFromProject, aw, pi);
 
-        public static Project MkProject(Func<FileInfo, IEnumerable<FileInfo>> getFilesFromProject, AdhocWorkspace workspace, FileInfo project)
+        public static Project MkProject(GetFilesFromProjectType getFilesFromProject, AdhocWorkspace workspace, FileInfo project)
         {
             var projectName = Path.GetFileNameWithoutExtension(project.Name);
             var projectId = ProjectId.CreateNewId();

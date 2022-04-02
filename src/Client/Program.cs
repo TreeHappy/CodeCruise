@@ -1,9 +1,23 @@
 ﻿using static System.Console;
+using Microsoft.Extensions.FileSystemGlobbing;
+
+IEnumerable<FileInfo> GetFilesForProject(FileInfo projectFileInfo)
+{
+    var matcher = new Microsoft.Extensions.FileSystemGlobbing.Matcher();
+
+    matcher.AddInclude("/**/*.cs");
+    matcher.AddExclude("/obj");
+
+    var files =
+        matcher.GetResultsInFullPath(projectFileInfo.DirectoryName).Select(f => new FileInfo(f));
+
+    return files;
+}
 
 var solutionFileInfo =
     new FileInfo(@"D:\Projects\CodeCruise\CodeCruise.sln");
 var solution =
-    await Library.SolutionBuilder.CreateSolutionAsync(solutionFileInfo);
+    await Library.SolutionBuilder.CreateSolutionAsync(solutionFileInfo, GetFilesForProject);
 
 foreach (var project in solution.Projects)
 {
