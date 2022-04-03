@@ -12,5 +12,6 @@
 		<PackageReference Include="FastGraph.Serialization" Version="3.0.0-alpha.1630" />
 		<PackageReference Include="GraphShape" Version="1.2.1" />
 		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.2.0-2.final" />
+		<PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="7.0.0-preview.2.22152.2" />
 	</ItemGroup>
 </Project>
