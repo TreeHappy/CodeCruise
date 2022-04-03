@@ -1,5 +1,7 @@
 ﻿using static System.Console;
+
 using Microsoft.Extensions.FileSystemGlobbing;
+using Library;
 
 IEnumerable<FileInfo> GetFilesForProject(FileInfo projectFileInfo)
 {
@@ -15,23 +17,37 @@ IEnumerable<FileInfo> GetFilesForProject(FileInfo projectFileInfo)
 }
 
 var solutionFileInfo =
-    new FileInfo(@"D:\Projects\CodeCruise\CodeCruise.sln");
+    // new FileInfo(@"D:\Projects\CodeCruise\CodeCruise.sln");
+    new FileInfo(@"D:\Projects\omnisharp-roslyn\OmniSharp.sln");
 var solution =
     await Library.SolutionBuilder.CreateSolutionAsync(solutionFileInfo, GetFilesForProject);
+var vertices =
+    new List<Vertex>();
+var edges =
+    new List<Edge>();
+var roslynDependencyGraph =
+    solution.GetProjectDependencyGraph();
 
 foreach (var project in solution.Projects)
 {
-    WriteLine($"{project.Name}");
+    vertices.Add(new Vertex(project.Name));
 
-    foreach (var reference in project.ProjectReferences)
-        WriteLine($"depends on {solution.GetProject(reference.ProjectId)?.Name}.");
+    var dependants =
+        roslynDependencyGraph
+        .GetProjectsThatDirectlyDependOnThisProject(project.Id)
+        .Select(reference =>
+                new Edge
+                    ( new Vertex(project.Name)
+                    , new Vertex(solution.GetProject(reference)?.Name ?? string.Empty)
+                    )
+                );
 
-    var compilation = await project.GetCompilationAsync();
-    var attributes = compilation.Assembly.GetAttributes();
-
-    foreach (var attribute in attributes)
-        WriteLine($"{attribute.AttributeClass.Name}");
-
-    foreach (var document in project.Documents)
-        WriteLine($"{document.Name}");
+    edges.AddRange(dependants);
 }
+
+var (dependencyGraph, components) =
+    DependencyGraph.Build(vertices, edges);
+
+GraphVizWriter.WriteDot((dependencyGraph, components), @"D:\Projects\CodeCruise\omnisharp.dot");
+
+ReadLine();

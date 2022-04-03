@@ -7,6 +7,10 @@
 	<ItemGroup>
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="FastGraph" Version="3.0.0-alpha.1630" />
+		<PackageReference Include="FastGraph.Graphviz" Version="3.0.0-alpha.1630" />
+		<PackageReference Include="FastGraph.Serialization" Version="3.0.0-alpha.1630" />
+		<PackageReference Include="GraphShape" Version="1.2.1" />
 		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.2.0-2.final" />
 	</ItemGroup>
 </Project>
