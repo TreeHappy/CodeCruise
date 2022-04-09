@@ -30,15 +30,12 @@ var roslynDependencyGraph =
 
 foreach (var project in solution.Projects)
 {
-    // var document = project.Documents.First();
-    var compilation = await project.GetCompilationAsync();
-    // var st = await document.GetSyntaxTreeAsync();
-    // var sr = await document.GetSyntaxRootAsync();
-
     var cancellationToken = new CancellationToken();
+    var compilation = await project.GetCompilationAsync();
     var visitor = new Library.ExportedTypesCollector(cancellationToken);
-    compilation.GlobalNamespace.Accept(visitor);
-    // var types = compilation.GetTypeByMetadataName("").Accept()
+
+    // compilation.GlobalNamespace.Accept(visitor);
+    compilation.Assembly.Accept(visitor);
 
     vertices.Add(new Vertex(project.Name));
 

@@ -49,15 +49,22 @@ namespace Library
         {
             _cancellationToken.ThrowIfCancellationRequested();
 
-            Console.WriteLine(type.Name);
+            Console.WriteLine(type.ToString());
 
             if (!IsAccessibleOutsideOfAssembly(type) || !_exportedTypes.Add(type))
                 return;
 
             var nestedTypes = type.GetTypeMembers();
+            var members = type.GetMembers();
 
-            if (nestedTypes.IsDefaultOrEmpty)
-                return;
+            foreach (var symbol in members)
+            {
+                _cancellationToken.ThrowIfCancellationRequested();
+                symbol.Accept(this);
+            }
+
+            // if (nestedTypes.IsDefaultOrEmpty)
+            //     return;
 
             foreach (INamedTypeSymbol nestedType in nestedTypes)
             {
