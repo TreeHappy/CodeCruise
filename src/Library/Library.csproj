@@ -5,6 +5,7 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
+	  <ProjectReference Include="..\Annotation\Annotation.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="FastGraph" Version="3.0.0-alpha.1630" />
