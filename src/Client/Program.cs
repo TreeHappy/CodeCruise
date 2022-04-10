@@ -30,9 +30,12 @@ var roslynDependencyGraph =
 
 foreach (var project in solution.Projects)
 {
-    var cancellationToken = new CancellationToken();
+    var document = project.Documents.First();
+    var syntaxTree = await document.GetSyntaxTreeAsync();
     var compilation = await project.GetCompilationAsync();
-    var visitor = new Library.ExportedTypesCollector(cancellationToken);
+    var cancellationToken = new CancellationToken();
+    var semanticModel = compilation.GetSemanticModel(syntaxTree);
+    var visitor = new Library.TypeCollector(cancellationToken, semanticModel);
 
     // compilation.GlobalNamespace.Accept(visitor);
     compilation.Assembly.Accept(visitor);
