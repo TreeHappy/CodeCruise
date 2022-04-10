@@ -65,8 +65,6 @@ namespace Library
 
         public override void VisitMethod(IMethodSymbol symbol)
         {
-            Console.WriteLine(symbol.ToString());
-
             // var syntaxVisitor = new SyntaxVisitor(semanticModel);
 
             // iterate method body
