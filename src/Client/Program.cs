@@ -27,6 +27,11 @@ var edges =
     new List<Edge>();
 var roslynDependencyGraph =
     solution.GetProjectDependencyGraph();
+var solutionX =
+    new Library.Strcuture.Solution
+        ( new Library.Strcuture.Identifier("OmniSharp")
+        , new Dictionary<Library.Strcuture.Identifier, Library.Strcuture.Project>()
+        );
 
 foreach (var project in solution.Projects)
 {
@@ -35,10 +40,17 @@ foreach (var project in solution.Projects)
     var compilation = await project.GetCompilationAsync();
     var cancellationToken = new CancellationToken();
     var semanticModel = compilation.GetSemanticModel(syntaxTree);
-    var visitor = new Library.TypeCollector(cancellationToken, semanticModel);
+    var projectIdentifier = new Library.Strcuture.Identifier(project.Name);
+    var visitor =
+        new Library.ProjectTypeCollector
+            ( cancellationToken
+            , semanticModel
+            , projectIdentifier
+            );
 
     // compilation.GlobalNamespace.Accept(visitor);
     compilation.Assembly.Accept(visitor);
+    solutionX.Projects.Add(projectIdentifier, visitor.Project);
 
     vertices.Add(new Vertex(project.Name));
 
