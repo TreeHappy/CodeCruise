@@ -1,18 +1,22 @@
+using Library.Strcuture;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Library
 {
-    public class TypeCollector : SymbolVisitor
+    public class ProjectTypeCollector : SymbolVisitor
     {
         private readonly CancellationToken _cancellationToken;
         private readonly SemanticModel semanticModel;
-        private Strcuture.Project currentProject;
+        private readonly Identifier projectIdentifier;
 
-        public TypeCollector(CancellationToken cancellation, SemanticModel semanticModel)
+        public Strcuture.Project Project { get; private set; }
+
+        public ProjectTypeCollector(CancellationToken cancellation, SemanticModel semanticModel, Strcuture.Identifier projectIdentifier)
         {
             _cancellationToken = cancellation;
             this.semanticModel = semanticModel;
+            this.projectIdentifier = projectIdentifier;
         }
 
 
@@ -29,9 +33,9 @@ namespace Library
                     , new Dictionary<Strcuture.Identifier, Attribute>()
                     );
 
-            currentProject =
+            Project =
                 new Strcuture.Project
-                    ( new Strcuture.Identifier("")
+                    ( projectIdentifier
                     , assembly
                     );
 
@@ -46,7 +50,7 @@ namespace Library
 
                 var namespaceIdentifier = new Strcuture.Identifier(symbol.Name);
 
-                currentProject
+                Project
                     .Assembly
                     .Namespaces
                     .TryAdd
@@ -63,28 +67,28 @@ namespace Library
         {
             Console.WriteLine(symbol.ToString());
 
-            var syntaxVisitor = new SyntaxVisitor(semanticModel);
+            // var syntaxVisitor = new SyntaxVisitor(semanticModel);
 
-            var identifiers =
-                symbol
-                    .DeclaringSyntaxReferences
-                    .SelectMany(
-                        d =>
-                            d
-                            .GetSyntax()
-                            .DescendantNodes()
-                            .OfType<CSharpSyntaxNode>()
-                    );
+            // iterate method body
+            // var identifiers =
+            //     symbol
+            //         .DeclaringSyntaxReferences
+            //         .SelectMany(
+            //             d =>
+            //                 d
+            //                 .GetSyntax()
+            //                 .DescendantNodes()
+            //                 .OfType<CSharpSyntaxNode>()
+            //         );
 
-            if (identifiers is not null) foreach (var a in identifiers)
-            {
-                a.Accept(syntaxVisitor);
-            }
+            // if (identifiers is not null) foreach (var a in identifiers)
+            // {
+            //     a.Accept(syntaxVisitor);
+            // }
 
+            // iterate public interface types
             // foreach (var s in symbol.Parameters)
             //     try { Console.WriteLine(s.Type.ContainingNamespace.Name); } catch {}
-
-            // Console.WriteLine(symbol.DeclaringSyntaxReferences.First().GetSyntax().GetText());
         }
 
         public override void VisitNamedType(INamedTypeSymbol type)
@@ -94,7 +98,7 @@ namespace Library
             var namespaceIdentifer = new Strcuture.Identifier(type.ContainingNamespace.Name);
             var typeIdentifier = new Strcuture.Identifier(type.Name);
 
-            currentProject.Assembly.Namespaces[namespaceIdentifer].Types
+            Project.Assembly.Namespaces[namespaceIdentifer].Types
                 .TryAdd
                     ( typeIdentifier
                     , new Strcuture.Type
