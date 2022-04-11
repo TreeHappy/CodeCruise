@@ -1,4 +1,4 @@
-namespace Library.Strcuture
+namespace Library.Structure
 {
     public static class Conversion
     {

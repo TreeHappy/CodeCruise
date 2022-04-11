@@ -1,4 +1,4 @@
-using Library.Strcuture;
+using Library.Structure;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -10,9 +10,9 @@ namespace Library
         private readonly SemanticModel semanticModel;
         private readonly Identifier projectIdentifier;
 
-        public Strcuture.Project Project { get; private set; }
+        public Structure.Project Project { get; private set; }
 
-        public ProjectTypeCollector(CancellationToken cancellation, SemanticModel semanticModel, Strcuture.Identifier projectIdentifier)
+        public ProjectTypeCollector(CancellationToken cancellation, SemanticModel semanticModel, Structure.Identifier projectIdentifier)
         {
             _cancellationToken = cancellation;
             this.semanticModel = semanticModel;
@@ -24,20 +24,24 @@ namespace Library
         {
             _cancellationToken.ThrowIfCancellationRequested();
 
-            var assemblyIdentifier = new Strcuture.Identifier(symbol.Name);
+            var assemblyIdentifier =
+                new Structure.Identifier(symbol.Name);
             var assembly =
-                new Strcuture.Assembly
+                new Structure.Assembly
                     ( assemblyIdentifier
-                    , new Dictionary<Strcuture.Identifier, Strcuture.Namespace>()
-                    , new Dictionary<Strcuture.Identifier, Strcuture.Assembly>()
-                    , new Dictionary<Strcuture.Identifier, Attribute>()
+                    , new Structure.Reference<Structure.Project>(projectIdentifier)
+                    , new Dictionary<Structure.Identifier, Structure.Namespace>()
+                    , new Dictionary<Structure.Identifier, Structure.Assembly>()
+                    , new Dictionary<Structure.Identifier, Structure.Attribute>()
                     );
 
             Project =
-                new Strcuture.Project
+                new Structure.Project
                     ( projectIdentifier
                     , assembly
                     );
+
+            assembly.Parent.SetIdentifier(Project);
 
             symbol.GlobalNamespace.Accept(this);
         }
@@ -48,15 +52,28 @@ namespace Library
             {
                 _cancellationToken.ThrowIfCancellationRequested();
 
-                var namespaceIdentifier = new Strcuture.Identifier(symbol.Name);
+                var namespaceIdentifier = new Structure.Identifier(symbol.ToString());
+                IEitherNamespaceOrAssembly parent =
+                    symbol.ContainingNamespace switch
+                        { INamespaceSymbol ns when ns.IsGlobalNamespace =>
+                            Project.Assembly
+                        , INamespaceSymbol ns =>
+                            Project.Assembly.Namespaces.Single(n => n.Key.Name == ns.ToString()).Value
+                        , null =>
+                            Project.Assembly
+                        };
 
                 Project
                     .Assembly
                     .Namespaces
                     .TryAdd
                         ( namespaceIdentifier
-                        , new Strcuture.Namespace(namespaceIdentifier, new Dictionary<Strcuture.Identifier, Strcuture.Namespace>()
-                        , new Dictionary<Strcuture.Identifier, Strcuture.Type>())
+                        , new Structure.Namespace
+                            ( namespaceIdentifier
+                            , new Reference<IEitherNamespaceOrAssembly>(parent)
+                            , new Dictionary<Structure.Identifier, Structure.Namespace>()
+                            , new Dictionary<Structure.Identifier, Structure.Type>()
+                            )
                         );
 
                 namespaceOrType.Accept(this);
@@ -93,19 +110,21 @@ namespace Library
         {
             _cancellationToken.ThrowIfCancellationRequested();
 
-            var namespaceIdentifer = new Strcuture.Identifier(type.ContainingNamespace.Name);
-            var typeIdentifier = new Strcuture.Identifier(type.Name);
+            var namespaceIdentifer = new Structure.Identifier(type.ContainingNamespace.ToString());
+            var typeIdentifier = new Structure.Identifier(type.Name);
+            var @namespace = Project.Assembly.Namespaces[namespaceIdentifer];
 
-            Project.Assembly.Namespaces[namespaceIdentifer].Types
+            @namespace.Types
                 .TryAdd
                     ( typeIdentifier
-                    , new Strcuture.Type
+                    , new Structure.Type
                         ( typeIdentifier
-                        , Strcuture.Conversion.From(type.DeclaredAccessibility)
-                        , new Dictionary<Strcuture.Identifier, Strcuture.Method>()
-                        , new Dictionary<Strcuture.Identifier, Strcuture.Property>()
-                        , new Dictionary<Strcuture.Identifier, Strcuture.Field>()
-                        , new Dictionary<Strcuture.Identifier, Strcuture.Attibute>()
+                        , new Reference<IEitherTypeOrNamespace>(@namespace)
+                        , Structure.Conversion.From(type.DeclaredAccessibility)
+                        , new Dictionary<Structure.Identifier, Structure.Method>()
+                        , new Dictionary<Structure.Identifier, Structure.Property>()
+                        , new Dictionary<Structure.Identifier, Structure.Field>()
+                        , new Dictionary<Structure.Identifier, Reference<Structure.Attribute>>()
                         )
                     );
 

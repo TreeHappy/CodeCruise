@@ -1,4 +1,5 @@
 namespace Library
 {
-    public record Vertex(string Name);
+
+    public record Vertex(string Name, VertexKind VertexKind);
 }

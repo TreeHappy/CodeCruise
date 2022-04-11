@@ -28,9 +28,9 @@ var edges =
 var roslynDependencyGraph =
     solution.GetProjectDependencyGraph();
 var solutionX =
-    new Library.Strcuture.Solution
-        ( new Library.Strcuture.Identifier("OmniSharp")
-        , new Dictionary<Library.Strcuture.Identifier, Library.Strcuture.Project>()
+    new Library.Structure.Solution
+        ( new Library.Structure.Identifier("OmniSharp")
+        , new Dictionary<Library.Structure.Identifier, Library.Structure.Project>()
         );
 
 foreach (var project in solution.Projects)
@@ -40,7 +40,7 @@ foreach (var project in solution.Projects)
     var compilation = await project.GetCompilationAsync();
     var cancellationToken = new CancellationToken();
     var semanticModel = compilation.GetSemanticModel(syntaxTree);
-    var projectIdentifier = new Library.Strcuture.Identifier(project.Name);
+    var projectIdentifier = new Library.Structure.Identifier(project.Name);
     var visitor =
         new Library.ProjectTypeCollector
             ( cancellationToken
@@ -52,15 +52,15 @@ foreach (var project in solution.Projects)
     compilation.Assembly.Accept(visitor);
     solutionX.Projects.Add(projectIdentifier, visitor.Project);
 
-    vertices.Add(new Vertex(project.Name));
+    vertices.Add(new Vertex(project.Name, VertexKind.Project));
 
     var dependants =
         roslynDependencyGraph
         .GetProjectsThatDirectlyDependOnThisProject(project.Id)
         .Select(reference =>
                 new Edge
-                    ( new Vertex(project.Name)
-                    , new Vertex(solution.GetProject(reference)?.Name ?? string.Empty)
+                    ( new Vertex(project.Name, VertexKind.Project)
+                    , new Vertex(solution.GetProject(reference)?.Name ?? string.Empty, VertexKind.Project)
                     )
                 );
 
