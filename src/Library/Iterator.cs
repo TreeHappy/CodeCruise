@@ -6,7 +6,7 @@ namespace Library
     {
         protected abstract void OnProject(Project project);
 
-        private void Iterate(Project project)
+        public void Iterate(Project project)
         {
             OnProject(project);
 

@@ -16,17 +16,31 @@ namespace Client
 
         protected override void OnNamespace(Namespace @namespace)
         {
-            throw new NotImplementedException();
+            if (vertices.Any(v => v.Name == @namespace.Identifier.Name))
+                return;
+
+            var namespaceVertex =
+                new Vertex(@namespace.Identifier.Name, VertexKind.Namespace);
+            var parentVertex =
+                new Vertex
+                    ( @namespace.Parent.Identifier.Name
+                    , @namespace.Parent.TypeName switch
+                        { "Library.Structure.Assembly" => VertexKind.Project
+                        , "Library.Structure.Namespace" => VertexKind.Namespace
+                        , string n => throw new Exception(n)
+                        }
+                    );
+
+            vertices.Add(namespaceVertex);
+            edges.Add(new Edge(parentVertex, namespaceVertex));
         }
 
         protected override void OnProject(Project project)
         {
-            throw new NotImplementedException();
         }
 
         protected override void OnType(Library.Structure.Type type)
         {
-            throw new NotImplementedException();
         }
     }
 }

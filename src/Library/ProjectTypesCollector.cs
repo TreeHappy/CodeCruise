@@ -29,7 +29,7 @@ namespace Library
             var assembly =
                 new Structure.Assembly
                     ( assemblyIdentifier
-                    , new Structure.Reference<Structure.Project>(projectIdentifier)
+                    , new Structure.Reference<Structure.Project>(projectIdentifier, typeof(Structure.Project))
                     , new Dictionary<Structure.Identifier, Structure.Namespace>()
                     , new Dictionary<Structure.Identifier, Structure.Assembly>()
                     , new Dictionary<Structure.Identifier, Structure.Attribute>()
@@ -48,10 +48,8 @@ namespace Library
 
         public override void VisitNamespace(INamespaceSymbol symbol)
         {
-            foreach (INamespaceOrTypeSymbol namespaceOrType in symbol.GetMembers())
+            if (symbol.IsGlobalNamespace is false)
             {
-                _cancellationToken.ThrowIfCancellationRequested();
-
                 var namespaceIdentifier = new Structure.Identifier(symbol.ToString());
                 IEitherNamespaceOrAssembly parent =
                     symbol.ContainingNamespace switch
@@ -75,6 +73,11 @@ namespace Library
                             , new Dictionary<Structure.Identifier, Structure.Type>()
                             )
                         );
+            }
+
+            foreach (INamespaceOrTypeSymbol namespaceOrType in symbol.GetMembers())
+            {
+                _cancellationToken.ThrowIfCancellationRequested();
 
                 namespaceOrType.Accept(this);
             }

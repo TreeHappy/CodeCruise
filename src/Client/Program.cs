@@ -65,6 +65,10 @@ foreach (var project in solution.Projects)
                 );
 
     edges.AddRange(dependants);
+
+    var graphAdder = new Client.GraphAdder(vertices, edges);
+
+    graphAdder.Iterate(visitor.Project);
 }
 
 var (dependencyGraph, components) =

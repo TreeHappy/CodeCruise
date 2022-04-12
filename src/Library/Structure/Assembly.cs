@@ -6,5 +6,9 @@ namespace Library.Structure
         , Dictionary<Identifier, Namespace> Namespaces
         , Dictionary<Identifier, Assembly> References
         , Dictionary<Identifier, Attribute> Attributes
-        ) : IEitherNamespaceOrAssembly, IIdentifiable;
+        ) : IEitherNamespaceOrAssembly, IIdentifiable
+    {
+        public System.Type Type_ =>
+            typeof(Assembly);
+    }
 }

@@ -5,5 +5,9 @@ namespace Library.Structure
         , Reference<IEitherNamespaceOrAssembly> Parent
         , Dictionary<Identifier, Namespace> Namespaces
         , Dictionary<Identifier, Type> Types
-        ) : IEitherTypeOrNamespace, IEitherNamespaceOrAssembly, IIdentifiable;
+        ) : IEitherTypeOrNamespace, IEitherNamespaceOrAssembly, IIdentifiable
+    {
+        public System.Type Type_ =>
+            typeof(Namespace);
+    }
 }

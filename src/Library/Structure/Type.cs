@@ -9,5 +9,9 @@ namespace Library.Structure
         , Dictionary<Identifier, Property> Properties
         , Dictionary<Identifier, Field> Fields
         , Dictionary<Identifier, Reference<Structure.Attribute>> Attributes
-        ) : IEitherTypeOrNamespace, IIdentifiable;
+        ) : IEitherTypeOrNamespace, IIdentifiable
+    {
+        public System.Type Type_ =>
+            typeof(Type);
+    }
 }
