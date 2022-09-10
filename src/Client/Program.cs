@@ -17,10 +17,11 @@ IEnumerable<FileInfo> GetFilesForProject(FileInfo projectFileInfo)
 }
 
 var solutionFileInfo =
-    // new FileInfo(@"D:\Projects\CodeCruise\CodeCruise.sln");
-    new FileInfo(@"D:\Projects\omnisharp-roslyn\OmniSharp.sln");
-var solution =
-    await Library.SolutionBuilder.CreateSolutionAsync(solutionFileInfo, GetFilesForProject);
+    new FileInfo(@"D:\Projects\CodeCruise\CodeCruise.sln");
+
+var solution = await Library.Roslyn.MkSolution2(solutionFileInfo);
+// var solution =
+//     await Library.SolutionBuilder.CreateSolutionAsync(solutionFileInfo, GetFilesForProject);
 var vertices =
     new List<Vertex>();
 var edges =

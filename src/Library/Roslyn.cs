@@ -4,6 +4,8 @@ namespace Library
     using System.IO;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.Text;
+    using Microsoft.Build.Locator;
+    using Microsoft.CodeAnalysis.MSBuild;
 
     public static class Roslyn
     {
@@ -40,6 +42,16 @@ namespace Library
                     );
 
             return roslynProject;
+        }
+
+        public async static Task<Solution?> MkSolution2(FileInfo solutionFile)
+        {
+            MSBuildLocator.RegisterDefaults();
+
+            using var msbuildWorkspace = MSBuildWorkspace.Create();
+            var solution = await msbuildWorkspace.OpenSolutionAsync(solutionFile.FullName);
+
+            return solution;
         }
 
         public static Solution MkSolution(FileInfo solutionFile, Func<AdhocWorkspace, FileInfo, Project> mkProject)
