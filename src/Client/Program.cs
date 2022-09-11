@@ -20,8 +20,6 @@ var solutionFileInfo =
     new FileInfo(@"D:\Projects\CodeCruise\CodeCruise.sln");
 
 var solution = await Library.Roslyn.MkSolution2(solutionFileInfo);
-// var solution =
-//     await Library.SolutionBuilder.CreateSolutionAsync(solutionFileInfo, GetFilesForProject);
 var vertices =
     new List<Vertex>();
 var edges =
@@ -49,10 +47,9 @@ foreach (var project in solution.Projects)
             , projectIdentifier
             );
 
-    // compilation.GlobalNamespace.Accept(visitor);
     compilation.Assembly.Accept(visitor);
-    solutionX.Projects.Add(projectIdentifier, visitor.Project);
 
+    solutionX.Projects.Add(projectIdentifier, visitor.Project);
     vertices.Add(new Vertex(project.Name, VertexKind.Project));
 
     var dependants =
@@ -76,5 +73,3 @@ var (dependencyGraph, components) =
     DependencyGraph.Build(vertices, edges);
 
 GraphVizWriter.WriteDot((dependencyGraph, components), @"D:\Projects\CodeCruise\omnisharp.dot");
-
-ReadLine();

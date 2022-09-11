@@ -16,7 +16,7 @@ namespace Client
 
         protected override void OnNamespace(Namespace @namespace)
         {
-            if (vertices.Any(v => v.Name == @namespace.Identifier.Name))
+            if (vertices.Any(v => v.Name == @namespace.Identifier.Name && v.VertexKind == VertexKind.Namespace))
                 return;
 
             var namespaceVertex =
@@ -35,12 +35,8 @@ namespace Client
             edges.Add(new Edge(parentVertex, namespaceVertex));
         }
 
-        protected override void OnProject(Project project)
-        {
-        }
+        protected override void OnProject(Project project) {}
 
-        protected override void OnType(Library.Structure.Type type)
-        {
-        }
+        protected override void OnType(Library.Structure.Type type) {}
     }
 }

@@ -113,6 +113,9 @@ namespace Library
         {
             _cancellationToken.ThrowIfCancellationRequested();
 
+            if (type.ContainingNamespace.IsGlobalNamespace)
+                return;
+
             var namespaceIdentifer = new Structure.Identifier(type.ContainingNamespace.ToString());
             var typeIdentifier = new Structure.Identifier(type.Name);
             var @namespace = Project.Assembly.Namespaces[namespaceIdentifer];
